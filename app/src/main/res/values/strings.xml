@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CloudonixNDK</string>
+    <string name="send_ip_address">Send IP address</string>
+    <string name="please_wait">Please Wait</string>
+</resources>

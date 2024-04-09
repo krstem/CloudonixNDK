@@ -8,6 +8,6 @@ import retrofit2.http.POST;
 
 public interface ApiService {
 
-    @POST("aws")
+    @POST("/")
     Call<IpAddress> checkAddress(@Body IpAddress ipAddress);
 }

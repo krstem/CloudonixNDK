@@ -64,13 +64,13 @@ Java_com_sourcico_cloudonixndk_MainActivity_ipAddressFromJNI(
 
 
             const std::string iName = ifa->ifa_name;
-            // check WIFI firt
-
-            if (iName == "wlan0") {
-                if (family == AF_INET6) {
-                    ipAddress = host;
-                }
-            } else if (iName == "rmnet16" && ipAddress.length() == 0) {
+            // check WIFI first
+//            if (iName == "wlan0") {
+//                if (family == AF_INET) { //ipv6 interface
+//                    ipAddress = host;
+//                }
+//            } else
+            if (iName == "rmnet16" && ipAddress.length() == 0) {
                 ipAddress = host;
             }
             LOGD("Address: <%s>", host);

@@ -41,7 +41,7 @@ public class App extends Application {
         });
         final OkHttpClient okHttpClient = httpClientBuilder.build();
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://s7om3fdgbt7lcvqdnxitjmtiim0uczux.lambda-url.us-east-2.on/")
+                .baseUrl("https://s7om3fdgbt7lcvqdnxitjmtiim0uczux.lambda-url.us-east-2.on.aws")
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(okHttpClient)
                 .build();

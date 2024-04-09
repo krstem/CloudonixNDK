@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -43,31 +44,37 @@ public class MainActivity extends AppCompatActivity {
             call.enqueue(new Callback<IpAddress>() {
                 @Override
                 public void onResponse(Call<IpAddress> call, Response<IpAddress> response) {
+
                     if (!response.isSuccessful()) {
                         // Handle the error scenario here
                         binding.progressCircular.setVisibility(View.GONE);
-                        binding.txtPleaseWait.setVisibility(View.GONE);
                         binding.btnSampleIpCall.setVisibility(View.VISIBLE);
                         return;
                     }
                     IpAddress data = response.body();
                     assert data != null;
-                    if (data.isNat()) {
-                        if (ipAddress.contains("%")){
-                            binding.sampleTextBackFromC.setText(String.format("IP: %s", ipAddress.split("%")[0]));
-
-                        } else {
-                            binding.sampleTextBackFromC.setText(String.format("IP: %s", ipAddress));
-                        }
-                        binding.progressCircular.setVisibility(View.GONE);
-
+                    if (ipAddress.contains("%")){
+                        binding.sampleTextBackFromC.setText(String.format("IP: %s", ipAddress.split("%")[0]));
                     }
-                    Toast.makeText(MainActivity.this, "Data from server: " + data.toString(), Toast.LENGTH_SHORT).show();
+                    // check if is the response from server is okay
+                    if (data.isNat()) {
+                        binding.sampleTextBackFromC.setTextColor(getResources().getColor(R.color.success));
+                    } else {
+                        binding.sampleTextBackFromC.setTextColor(getResources().getColor(R.color.red));
+                    }
+                    binding.sampleTextBackFromC.setText(String.format("Current IP: %s\nStatus: %s", ipAddress, data.isNat()));
+
+                    binding.progressCircular.setVisibility(View.GONE);
+                    binding.txtPleaseWait.setVisibility(View.GONE);
+
+                    Toast.makeText(MainActivity.this, "Data from server: " + data.toString(), Toast.LENGTH_LONG).show();
                 }
 
                 @Override
                 public void onFailure(Call<IpAddress> call, Throwable throwable) {
                     Log.w(TAG, "onFailure: ", throwable );
+                    Toast.makeText(MainActivity.this, "Something happen: " + throwable, Toast.LENGTH_LONG).show();
+
                 }
             });
         });

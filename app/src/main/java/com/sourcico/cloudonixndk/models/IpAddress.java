@@ -59,8 +59,7 @@ public class IpAddress {
 
     @Override
     public String toString() {
-        return "IpAddress{" +
-                "type='" + type + '\'' +
+        return "Address { " +
                 ", nat=" + nat +
                 ", address='" + address + '\'' +
                 '}';

@@ -73,6 +73,7 @@ Java_com_sourcico_cloudonixndk_MainActivity_ipAddressFromJNI(
 
             if(IN6_IS_ADDR_LINKLOCAL(host)) {
                 LOGD("Check GLOBAL address: <%s>", host);
+                ipAddress = host;
                 return env->NewStringUTF(ipAddress.c_str());
             }
 

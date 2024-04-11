@@ -7,8 +7,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <jni.h>
+#include <string>
 #define TAG "CloudonixNDK"
-
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,    TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN,     TAG, __VA_ARGS__)
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO,     TAG, __VA_ARGS__)
@@ -86,7 +87,8 @@ Java_com_sourcico_cloudonixndk_MainActivity_ipAddressFromJNI(
             } else {
                 ipv4 = 0;
             }
-            if ((ipv4 & 0x0000ffff) == 0x0000fea9) {
+            LOGD("ipv4: <%u>", ipv4);
+            if (iName == "lo" && (ipv4 & 0x0000ffff) == 0x0000fea9) {
                 LOGD("Address is link local: <%u> %s", ipv4, host);
                 ipAddressLinkLocalV4 = host;
             }
@@ -94,6 +96,28 @@ Java_com_sourcico_cloudonixndk_MainActivity_ipAddressFromJNI(
         }
     }
 
+
+    // Get host name
+    char hostPublic[256];
+    if (gethostname(hostPublic, sizeof(hostPublic)) == -1) {
+        throw std::runtime_error("Error getting host name");
+    }
+
+    // Get host entry
+    struct hostent *host_entry;
+    host_entry = gethostbyname(hostPublic);
+    if (host_entry == nullptr) {
+        throw std::runtime_error("Error getting host entry");
+    }
+
+    // Convert IP address to string
+    struct in_addr **addr_list = (struct in_addr **) host_entry->h_addr_list;
+    std::string ip_a4 = inet_ntoa(*addr_list[0]);
+
+    LOGD("Address Ip 4 public: <%s> ipAddressLinkLocalV4: <%s>", ip_a4.c_str(), ipAddressLinkLocalV4.c_str());
+    if (ipAddressLinkLocalV4.length() == 0 && ip_a4.length() > 0) {
+        ipAddressLinkLocalV4 = ip_a4;
+    }
     freeifaddrs(ifaddr);
     if (ipAddressV6.length() > 0) {
         return env->NewStringUTF(ipAddressV6.c_str());
@@ -103,7 +127,6 @@ Java_com_sourcico_cloudonixndk_MainActivity_ipAddressFromJNI(
         return env->NewStringUTF(ipAddress.c_str());
     }
 }
-
 
 extern "C" JNIEXPORT jstring
 JNICALL

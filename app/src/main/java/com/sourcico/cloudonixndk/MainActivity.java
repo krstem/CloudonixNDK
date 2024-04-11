@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             binding.btnSampleIpCall.setVisibility(View.GONE);
 
             String ipAddress = ipAddressFromJNI();
-            Call<IpAddress> call = App.apiService.checkAddress(new IpAddress(ipAddress));
+            Call<IpAddress> call = App.apiService.checkAddress(new IpAddress(ipAddress)); // 2001:0000:130F:0000:0000:09C0:876A:130B
             call.enqueue(new Callback<IpAddress>() {
                 @Override
                 public void onResponse(Call<IpAddress> call, Response<IpAddress> response) {

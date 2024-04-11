@@ -62,15 +62,20 @@ Java_com_sourcico_cloudonixndk_MainActivity_ipAddressFromJNI(
                 LOGW("getnameinfo() failed: %s\n", gai_strerror(s));
             }
 
-
             const std::string iName = ifa->ifa_name;
             // check WIFI first
             if (iName == "wlan0") {
                 ipAddress = host;
-            } else if (iName.find("rmnet")!= std::string::npos) {
+            } else if (iName.find("rmnet")!= std::string::npos && ipAddress.length() == 0) {
                 // ((iName == "rmnet16" || iName == "rmnet2" || iName == "rmnet0"))
                 ipAddress = host;
             }
+
+            if(IN6_IS_ADDR_LINKLOCAL(host)) {
+                LOGD("Check GLOBAL address: <%s>", host);
+                return env->NewStringUTF(ipAddress.c_str());
+            }
+
             LOGD("Address: <%s>", host);
         }
     }

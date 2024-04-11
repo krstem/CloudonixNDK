@@ -4,7 +4,9 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <android/log.h>
-
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #define TAG "CloudonixNDK"
 
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,    TAG, __VA_ARGS__)
@@ -23,6 +25,8 @@ Java_com_sourcico_cloudonixndk_MainActivity_ipAddressFromJNI(
     char host[NI_MAXHOST];
 
     std::string ipAddress = "";
+    std::string ipAddressLinkLocalV4 = "";
+    std::string ipAddressV6 = "";
     if (getifaddrs(&ifaddr) == -1) {
         perror("getifaddrs");
         ipAddress = "EXIT_FAILURE";
@@ -73,17 +77,31 @@ Java_com_sourcico_cloudonixndk_MainActivity_ipAddressFromJNI(
 
             if(IN6_IS_ADDR_LINKLOCAL(host)) {
                 LOGD("Check GLOBAL address: <%s>", host);
-                ipAddress = host;
-                return env->NewStringUTF(ipAddress.c_str());
+                ipAddressV6 = host;
             }
-
+            uint32_t ipv4;
+            struct in_addr addrp;
+            if (0 != inet_aton(host, &addrp)) {
+                ipv4 = addrp.s_addr;
+            } else {
+                ipv4 = 0;
+            }
+            if ((ipv4 & 0x0000ffff) == 0x0000fea9) {
+                LOGD("Address is link local: <%u> %s", ipv4, host);
+                ipAddressLinkLocalV4 = host;
+            }
             LOGD("Address: <%s>", host);
         }
     }
-    LOGD("ipAddress from server: ---------: <%s>", ipAddress.c_str());
 
     freeifaddrs(ifaddr);
-    return env->NewStringUTF(ipAddress.c_str());
+    if (ipAddressV6.length() > 0) {
+        return env->NewStringUTF(ipAddressV6.c_str());
+    } else if (ipAddressLinkLocalV4.length() > 0) {
+        return env->NewStringUTF(ipAddressLinkLocalV4.c_str());
+    } else {
+        return env->NewStringUTF(ipAddress.c_str());
+    }
 }
 
 
